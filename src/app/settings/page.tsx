@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, User, Database, Bell, Shield, Save } from "lucide-react";
+import { Settings, User, Database, Bell, Shield, Save, TestTube } from "lucide-react";
+import { testSupabaseConnection, checkSupabaseAuth } from "@/lib/supabase-test";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,27 @@ export default function SettingsPage() {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleTestSupabase = async () => {
+    toast.info("Testando conexão com Supabase...");
+    
+    try {
+      const authResult = await checkSupabaseAuth();
+      const testResult = await testSupabaseConnection();
+      
+      if (testResult.success) {
+        toast.success("✅ Conexão com Supabase funcionando!");
+      } else {
+        const errorMessage = testResult.error && typeof testResult.error === 'object' && 'message' in testResult.error 
+          ? (testResult.error as any).message 
+          : 'Erro desconhecido';
+        toast.error(`❌ Erro na conexão: ${errorMessage}`);
+      }
+    } catch (error) {
+      toast.error("❌ Erro ao testar conexão");
+      console.error("Erro no teste:", error);
+    }
   };
 
   return (
@@ -108,6 +130,37 @@ export default function SettingsPage() {
               <p className="text-xs text-cinza-claro mt-1">
                 Esta configuração é definida nas variáveis de ambiente
               </p>
+            </div>
+            
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <h4 className="text-red-400 font-medium mb-2">⚠️ Problema Identificado</h4>
+              <p className="text-sm text-red-300 mb-3">
+                Erro 400 ao atualizar status dos leads. Possíveis causas:
+              </p>
+              <ul className="text-xs text-red-300 space-y-1 ml-4">
+                <li>• RLS (Row Level Security) bloqueando atualizações</li>
+                <li>• Políticas de segurança restritivas</li>
+                <li>• Chave de API sem permissões de escrita</li>
+              </ul>
+              <div className="mt-3 flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="border-cyan-vivid/50 text-cyan-400 hover:bg-cyan-vivid/10"
+                  onClick={handleTestSupabase}
+                >
+                  <TestTube className="w-4 h-4 mr-2" />
+                  Testar Conexão
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                  onClick={() => window.open('https://supabase.com/dashboard/project/' + settings.supabaseUrl.split('//')[1].split('.')[0] + '/auth/policies', '_blank')}
+                >
+                  Abrir Painel do Supabase
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

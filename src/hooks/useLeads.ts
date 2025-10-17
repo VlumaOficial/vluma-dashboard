@@ -71,12 +71,26 @@ export function useUpdateLeadStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: Lead["status"] }) => {
-      const { error } = await supabase
+      console.log("Tentando atualizar lead:", { id, status });
+      
+      const { data, error } = await supabase
         .from("contatos")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro detalhado do Supabase:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      console.log("Lead atualizado com sucesso:", data);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -85,7 +99,7 @@ export function useUpdateLeadStatus() {
     },
     onError: (error) => {
       console.error("Erro ao atualizar status:", error);
-      toast.error("Erro ao atualizar status do lead");
+      toast.error(`Erro ao atualizar status: ${error.message || 'Erro desconhecido'}`);
     },
   });
 }
