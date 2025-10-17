@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
             <CardContent>
               {/* Simple Bar Chart Representation */}
               <div className="space-y-4">
-                {conversionData.map((data, index) => {
+                {conversionData.map((data) => {
                   const conversionRate = (data.convertidos / data.leads) * 100;
                   return (
                     <div key={data.month} className="space-y-2">
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {leadSources.map((source, index) => (
+                {leadSources.map((source) => (
                   <div key={source.source} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-branco-suave">{source.source}</span>

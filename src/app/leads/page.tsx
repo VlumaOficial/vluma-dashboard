@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, Calendar, MoreHorizontal, Trash2, Edit, Eye } from "lucide-react";
+import { Mail, Phone, MoreHorizontal, Trash2, Eye } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useLeads, useUpdateLeadStatus, useDeleteLead } from "@/hooks/useLeads";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Lead } from "@/lib/supabase";
