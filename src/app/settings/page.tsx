@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, User, Database, Bell, Shield, Save, TestTube } from "lucide-react";
+import { User, Database, Bell, Shield, Save, TestTube } from "lucide-react";
 import { testSupabaseConnection, checkSupabaseAuth } from "@/lib/supabase-test";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -37,14 +37,14 @@ export default function SettingsPage() {
     toast.info("Testando conexão com Supabase...");
     
     try {
-      const authResult = await checkSupabaseAuth();
+      await checkSupabaseAuth();
       const testResult = await testSupabaseConnection();
       
       if (testResult.success) {
         toast.success("✅ Conexão com Supabase funcionando!");
       } else {
         const errorMessage = testResult.error && typeof testResult.error === 'object' && 'message' in testResult.error 
-          ? (testResult.error as any).message 
+          ? (testResult.error as { message: string }).message 
           : 'Erro desconhecido';
         toast.error(`❌ Erro na conexão: ${errorMessage}`);
       }
