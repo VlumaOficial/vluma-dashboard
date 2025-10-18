@@ -94,6 +94,24 @@ export function useMainMetrics(period: string = "30days") {
       const previousTotal = previousLeads?.length || 0;
       const crescimento = previousTotal > 0 ? ((totalLeads - previousTotal) / previousTotal) * 100 : 0;
 
+      // Calcular custo por lead dinamicamente
+      let custoporLead = 45; // Valor padrão
+      try {
+        const { data: costResult } = await supabase
+          .rpc('calculate_cost_per_lead', { period_days: days });
+        
+        if (costResult) {
+          custoporLead = parseFloat(costResult);
+        }
+      } catch (error) {
+        console.log("Usando custo por lead padrão - tabelas de marketing não configuradas ainda");
+      }
+
+      // Calcular ROI baseado em conversões e custo
+      const custoTotal = totalLeads * custoporLead;
+      const receitaEstimada = convertidos * 2500; // R$ 2.500 por conversão (valor médio)
+      const roi = custoTotal > 0 ? ((receitaEstimada - custoTotal) / custoTotal) * 100 : 0;
+
       return {
         totalLeads,
         convertidos,
@@ -103,8 +121,8 @@ export function useMainMetrics(period: string = "30days") {
         tempoMedioConversao,
         taxaAberturaEmail,
         crescimento,
-        custoporLead: 45, // Valor fixo - pode ser configurável
-        roi: 285, // Valor calculado baseado em vendas
+        custoporLead,
+        roi: Math.round(roi),
       };
     },
   });
