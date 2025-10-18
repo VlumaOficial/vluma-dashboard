@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, TrendingUp, Users, Calendar, Mail, Phone, Download, Filter } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Calendar, Mail, Download } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,9 +22,8 @@ export default function AnalyticsPage() {
   // Hooks para dados reais
   const { data: mainMetrics, isLoading: metricsLoading } = useMainMetrics(selectedPeriod);
   const { data: conversionData, isLoading: conversionLoading } = useConversionData(selectedPeriod);
-  const { data: emailPerformance, isLoading: emailLoading } = useEmailPerformance();
+  const { isLoading: emailLoading } = useEmailPerformance();
   const { data: salesFunnel, isLoading: funnelLoading } = useSalesFunnel();
-  const { data: timeAnalysis, isLoading: timeLoading } = useTimeAnalysis(selectedPeriod);
   
   const handleExportReport = () => {
     toast.info("Exportando relatório... Funcionalidade em desenvolvimento");

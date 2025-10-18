@@ -115,7 +115,7 @@ export function useUpdateLeadAgendamento() {
     }) => {
       console.log("Tentando atualizar lead com agendamento:", { id, status, dataAgendamento });
       
-      const updateData: any = { status: status };
+      const updateData: { status: Lead["status"]; data_agendamento?: string } = { status: status };
       if (dataAgendamento) {
         updateData.data_agendamento = dataAgendamento;
       }

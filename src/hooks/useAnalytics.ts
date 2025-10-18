@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { subDays, startOfMonth, endOfMonth, format, parseISO } from "date-fns";
+import { subDays, parseISO } from "date-fns";
 
 // Interfaces para Analytics
 export interface ConversionData {
@@ -79,7 +79,7 @@ export function useMainMetrics(period: string = "30days") {
       // Calcular métricas de email
       const emailsEnviados = emailStats?.length || 0;
       const emailsAbertos = emailStats?.filter(e => e.opened_at).length || 0;
-      const emailsClicados = emailStats?.filter(e => e.clicked_at).length || 0;
+      // const emailsClicados = emailStats?.filter(e => e.clicked_at).length || 0;
       
       const taxaAberturaEmail = emailsEnviados > 0 ? (emailsAbertos / emailsEnviados) * 100 : 0;
 

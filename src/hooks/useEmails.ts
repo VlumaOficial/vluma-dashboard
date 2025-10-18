@@ -290,7 +290,7 @@ export function useSendEmail() {
       if (templateError) throw templateError;
 
       // Buscar configuração SMTP
-      const { data: config, error: configError } = await supabase
+      const { error: configError } = await supabase
         .from("email_config")
         .select("*")
         .limit(1)

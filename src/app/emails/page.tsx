@@ -1,11 +1,11 @@
 "use client";
 
-import { Mail, Send, FileText, Users, Clock, Settings, Plus, Eye, Edit, Trash2 } from "lucide-react";
+import { Mail, Send, FileText, Users, Clock, Settings } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,11 +20,9 @@ import {
   useSendEmail,
   useSaveEmailConfig,
   useCreateTemplate,
-  useUpdateTemplate
 } from "@/hooks/useEmails";
 import { useLeads } from "@/hooks/useLeads";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 export default function EmailsPage() {
   // Hooks para dados
@@ -42,7 +40,6 @@ export default function EmailsPage() {
   // Estados para modais
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   
   // Estados para formulários
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
@@ -60,14 +57,14 @@ export default function EmailsPage() {
     from_email: emailConfig?.from_email || "",
   });
   
-  // Estados para novo template
-  const [newTemplate, setNewTemplate] = useState({
-    name: "",
-    subject: "",
-    body: "",
-    description: "",
-    status: "rascunho" as const,
-  });
+  // Estados para novo template (placeholder)
+  // const [newTemplate, setNewTemplate] = useState({
+  //   name: "",
+  //   subject: "",
+  //   body: "",
+  //   description: "",
+  //   status: "rascunho" as const,
+  // });
   
   // Handlers
   const handleSendEmail = () => {
@@ -101,23 +98,7 @@ export default function EmailsPage() {
   };
   
   const handleCreateTemplate = () => {
-    if (!newTemplate.name || !newTemplate.subject || !newTemplate.body) {
-      toast.error("Preencha todos os campos obrigatórios!");
-      return;
-    }
-    
-    createTemplate.mutate(newTemplate, {
-      onSuccess: () => {
-        setIsTemplateModalOpen(false);
-        setNewTemplate({
-          name: "",
-          subject: "",
-          body: "",
-          description: "",
-          status: "rascunho",
-        });
-      }
-    });
+    toast.info("Criação de templates - Em desenvolvimento");
   };
   
   const leadsDisponiveis = leads?.filter(lead => lead.email) || [];
@@ -187,7 +168,7 @@ export default function EmailsPage() {
               </h3>
               <Button 
                 className="bg-laranja-cta hover:bg-laranja-cta/80"
-                onClick={() => setIsTemplateModalOpen(true)}
+                onClick={handleCreateTemplate}
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Novo Template
@@ -272,7 +253,7 @@ export default function EmailsPage() {
                   ))}
                 </div>
               ) : emailLogs && emailLogs.length > 0 ? (
-                emailLogs.slice(0, 5).map((log: any) => (
+                emailLogs.slice(0, 5).map((log) => (
                 <div
                   key={log.id}
                   className="p-3 bg-white/5 rounded-lg border border-white/10"
