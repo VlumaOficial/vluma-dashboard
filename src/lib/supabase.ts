@@ -12,7 +12,7 @@ export interface Lead {
   email: string
   whatsapp: string
   mensagem?: string
-  status_agendamento: 'pendente' | 'agendado' | 'convertido' | 'perdido'
+  status: 'pendente' | 'agendado' | 'convertido' | 'perdido'
   created_at: string
   respostas_id?: string
   aceite_privacidade_em: string

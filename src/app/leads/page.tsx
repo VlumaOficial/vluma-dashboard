@@ -40,11 +40,11 @@ export default function LeadsPage() {
   const filteredLeads = leads?.filter(lead => {
     const matchesSearch = lead.nome.toLowerCase().includes(search.toLowerCase()) ||
                          lead.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || lead.status_agendamento === statusFilter;
+    const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const handleStatusChange = (leadId: string, newStatus: Lead["status_agendamento"]) => {
+  const handleStatusChange = (leadId: string, newStatus: Lead["status"]) => {
     updateStatus.mutate({ id: leadId, status: newStatus });
   };
 
@@ -148,12 +148,12 @@ export default function LeadsPage() {
                     </td>
                     <td className="p-4">
                       <Select
-                        value={lead.status_agendamento}
-                        onValueChange={(value) => handleStatusChange(lead.id, value as Lead["status_agendamento"])}
+                        value={lead.status}
+                        onValueChange={(value) => handleStatusChange(lead.id, value as Lead["status"])}
                       >
                         <SelectTrigger className="w-32 h-8 bg-transparent border-0 p-0">
-                          <Badge className={statusColors[lead.status_agendamento as keyof typeof statusColors]}>
-                            {statusLabels[lead.status_agendamento as keyof typeof statusLabels]}
+                          <Badge className={statusColors[lead.status as keyof typeof statusColors]}>
+                            {statusLabels[lead.status as keyof typeof statusLabels]}
                           </Badge>
                         </SelectTrigger>
                         <SelectContent>
@@ -219,8 +219,8 @@ export default function LeadsPage() {
                 <div>
                   <label className="text-sm font-medium text-branco-suave">Status</label>
                   <div className="mt-1">
-                    <Badge className={statusColors[selectedLead.status_agendamento as keyof typeof statusColors]}>
-                      {statusLabels[selectedLead.status_agendamento as keyof typeof statusLabels]}
+                    <Badge className={statusColors[selectedLead.status as keyof typeof statusColors]}>
+                      {statusLabels[selectedLead.status as keyof typeof statusLabels]}
                     </Badge>
                   </div>
                 </div>

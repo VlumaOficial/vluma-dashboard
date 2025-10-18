@@ -28,7 +28,7 @@ export default function Home() {
   const { data: stats, isLoading: statsLoading } = useLeadStats();
 
   const recentLeads = leads?.slice(0, 5) || [];
-  const agendamentos = leads?.filter(lead => lead.status_agendamento === "agendado").slice(0, 3) || [];
+  const agendamentos = leads?.filter(lead => lead.status === "agendado").slice(0, 3) || [];
 
   return (
     <DashboardLayout 
@@ -116,8 +116,8 @@ export default function Home() {
                       <p className="text-sm text-cinza-claro mb-2">
                         {format(new Date(lead.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                       </p>
-                      <Badge className={statusColors[lead.status_agendamento]}>
-                        {statusLabels[lead.status_agendamento]}
+                      <Badge className={statusColors[lead.status]}>
+                        {statusLabels[lead.status]}
                       </Badge>
                     </div>
                   </div>

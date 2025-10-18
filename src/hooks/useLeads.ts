@@ -32,7 +32,7 @@ export function useLeadStats() {
     queryFn: async () => {
       const { data: leads, error } = await supabase
         .from("contatos")
-        .select("status_agendamento, created_at");
+        .select("status, created_at");
 
       if (error) {
         console.error("Erro ao buscar estatísticas:", error);
@@ -40,8 +40,8 @@ export function useLeadStats() {
       }
 
       const total = leads?.length || 0;
-      const convertidos = leads?.filter(lead => lead.status_agendamento === "convertido").length || 0;
-      const agendados = leads?.filter(lead => lead.status_agendamento === "agendado").length || 0;
+      const convertidos = leads?.filter(lead => lead.status === "convertido").length || 0;
+      const agendados = leads?.filter(lead => lead.status === "agendado").length || 0;
       const taxaConversao = total > 0 ? Math.round((convertidos / total) * 100) : 0;
 
       // Calcular crescimento do mês anterior (simulado)
@@ -70,12 +70,12 @@ export function useUpdateLeadStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: Lead["status_agendamento"] }) => {
+    mutationFn: async ({ id, status }: { id: string; status: Lead["status"] }) => {
       console.log("Tentando atualizar lead:", { id, status });
       
       const { data, error } = await supabase
         .from("contatos")
-        .update({ status_agendamento: status })
+        .update({ status: status })
         .eq("id", id)
         .select();
 
