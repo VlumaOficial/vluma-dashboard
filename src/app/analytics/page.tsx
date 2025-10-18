@@ -1,31 +1,34 @@
 "use client";
 
-import { BarChart3, TrendingUp, Users, Calendar, Mail, Phone } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Calendar, Mail, Phone, Download, Filter } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// Mock data for charts
-const conversionData = [
-  { month: "Jan", leads: 45, convertidos: 12 },
-  { month: "Fev", leads: 52, convertidos: 18 },
-  { month: "Mar", leads: 38, convertidos: 15 },
-  { month: "Abr", leads: 61, convertidos: 22 },
-  { month: "Mai", leads: 55, convertidos: 19 },
-  { month: "Jun", leads: 67, convertidos: 28 },
-];
-
-const leadSources = [
-  { source: "Site VLUMA", leads: 145, percentage: 42 },
-  { source: "Instagram", leads: 89, percentage: 26 },
-  { source: "LinkedIn", leads: 67, percentage: 19 },
-  { source: "Indicação", leads: 34, percentage: 10 },
-  { source: "Outros", leads: 10, percentage: 3 },
-];
+import { useState } from "react";
+import { toast } from "sonner";
+import { 
+  useMainMetrics, 
+  useConversionData, 
+  useEmailPerformance, 
+  useSalesFunnel,
+  useTimeAnalysis
+} from "@/hooks/useAnalytics";
 
 export default function AnalyticsPage() {
+  const [selectedPeriod, setSelectedPeriod] = useState("30days");
+  
+  // Hooks para dados reais
+  const { data: mainMetrics, isLoading: metricsLoading } = useMainMetrics(selectedPeriod);
+  const { data: conversionData, isLoading: conversionLoading } = useConversionData(selectedPeriod);
+  const { data: emailPerformance, isLoading: emailLoading } = useEmailPerformance();
+  const { data: salesFunnel, isLoading: funnelLoading } = useSalesFunnel();
+  const { data: timeAnalysis, isLoading: timeLoading } = useTimeAnalysis(selectedPeriod);
+  
+  const handleExportReport = () => {
+    toast.info("Exportando relatório... Funcionalidade em desenvolvimento");
+  };
   return (
     <DashboardLayout 
       title="Analytics" 
@@ -34,19 +37,23 @@ export default function AnalyticsPage() {
       {/* Period Filter */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4">
-          <Select defaultValue="30days">
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger className="w-48 bg-white/5 border-white/20 text-branco-puro">
               <SelectValue placeholder="Período" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7days">Últimos 7 dias</SelectItem>
-              <SelectItem value="30days">Últimos 30 dias</SelectItem>
-              <SelectItem value="90days">Últimos 90 dias</SelectItem>
-              <SelectItem value="year">Este ano</SelectItem>
+            <SelectContent className="bg-card-dark border-purple-vivid/20">
+              <SelectItem value="7days" className="text-branco-puro hover:bg-white/10">Últimos 7 dias</SelectItem>
+              <SelectItem value="30days" className="text-branco-puro hover:bg-white/10">Últimos 30 dias</SelectItem>
+              <SelectItem value="90days" className="text-branco-puro hover:bg-white/10">Últimos 90 dias</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <Button variant="outline" className="text-cyan-vivid border-cyan-vivid/50">
+        <Button 
+          variant="outline" 
+          className="text-cyan-vivid border-cyan-vivid/50 hover:bg-cyan-vivid/10"
+          onClick={handleExportReport}
+        >
+          <Download className="w-4 h-4 mr-2" />
           Exportar Relatório
         </Button>
       </div>
@@ -58,10 +65,14 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-cinza-claro">Taxa de Conversão</p>
-                <p className="text-2xl font-bold text-branco-puro">34.2%</p>
+                <p className="text-2xl font-bold text-branco-puro">
+                  {metricsLoading ? "--" : `${mainMetrics?.taxaConversao.toFixed(1) || 0}%`}
+                </p>
                 <div className="flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3 text-verde-inteligente" />
-                  <span className="text-xs text-verde-inteligente">+5.2%</span>
+                  <TrendingUp className={`w-3 h-3 ${(mainMetrics?.crescimento || 0) >= 0 ? 'text-verde-inteligente' : 'text-red-400 rotate-180'}`} />
+                  <span className={`text-xs ${(mainMetrics?.crescimento || 0) >= 0 ? 'text-verde-inteligente' : 'text-red-400'}`}>
+                    {metricsLoading ? "--" : `${(mainMetrics?.crescimento || 0) >= 0 ? '+' : ''}${mainMetrics?.crescimento.toFixed(1) || 0}%`}
+                  </span>
                 </div>
               </div>
               <BarChart3 className="w-8 h-8 text-purple-vivid" />
@@ -74,10 +85,12 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-cinza-claro">Tempo Médio</p>
-                <p className="text-2xl font-bold text-branco-puro">2.5 dias</p>
+                <p className="text-2xl font-bold text-branco-puro">
+                  {metricsLoading ? "--" : `${mainMetrics?.tempoMedioConversao || 0} dias`}
+                </p>
                 <div className="flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3 text-verde-inteligente" />
-                  <span className="text-xs text-verde-inteligente">-0.3 dias</span>
+                  <span className="text-xs text-verde-inteligente">Otimizado</span>
                 </div>
               </div>
               <Calendar className="w-8 h-8 text-cyan-vivid" />
@@ -90,10 +103,12 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-cinza-claro">Custo por Lead</p>
-                <p className="text-2xl font-bold text-branco-puro">R$ 45</p>
+                <p className="text-2xl font-bold text-branco-puro">
+                  {metricsLoading ? "--" : `R$ ${mainMetrics?.custoporLead || 0}`}
+                </p>
                 <div className="flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3 text-red-400 rotate-180" />
-                  <span className="text-xs text-red-400">+R$ 3</span>
+                  <TrendingUp className="w-3 h-3 text-verde-inteligente" />
+                  <span className="text-xs text-verde-inteligente">Controlado</span>
                 </div>
               </div>
               <Users className="w-8 h-8 text-verde-inteligente" />
@@ -106,10 +121,12 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-cinza-claro">ROI</p>
-                <p className="text-2xl font-bold text-branco-puro">285%</p>
+                <p className="text-2xl font-bold text-branco-puro">
+                  {metricsLoading ? "--" : `${mainMetrics?.roi || 0}%`}
+                </p>
                 <div className="flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3 text-verde-inteligente" />
-                  <span className="text-xs text-verde-inteligente">+12%</span>
+                  <span className="text-xs text-verde-inteligente">Excelente</span>
                 </div>
               </div>
               <TrendingUp className="w-8 h-8 text-laranja-cta" />
@@ -126,33 +143,49 @@ export default function AnalyticsPage() {
               <CardTitle className="text-branco-puro">Conversão por Mês</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Simple Bar Chart Representation */}
+              {/* Gráfico de Conversão com Dados Reais */}
               <div className="space-y-4">
-                {conversionData.map((data) => {
-                  const conversionRate = (data.convertidos / data.leads) * 100;
-                  return (
-                    <div key={data.month} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-branco-suave">{data.month}</span>
-                        <div className="flex gap-4">
-                          <span className="text-cinza-claro">{data.leads} leads</span>
-                          <span className="text-verde-inteligente">{data.convertidos} convertidos</span>
-                          <span className="text-purple-vivid">{conversionRate.toFixed(1)}%</span>
+                {conversionLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="animate-pulse space-y-2">
+                        <div className="h-4 bg-white/10 rounded w-1/3"></div>
+                        <div className="h-4 bg-white/5 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : conversionData && conversionData.length > 0 ? (
+                  conversionData.map((data) => {
+                    const maxLeads = Math.max(...conversionData.map(d => d.total_leads));
+                    return (
+                      <div key={data.period} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-branco-suave">{data.period}</span>
+                          <div className="flex gap-4">
+                            <span className="text-cinza-claro">{data.total_leads} leads</span>
+                            <span className="text-verde-inteligente">{data.convertidos} convertidos</span>
+                            <span className="text-purple-vivid">{data.taxa_conversao.toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 h-4">
+                          <div 
+                            className="bg-purple-vivid/30 rounded-sm"
+                            style={{ width: `${maxLeads > 0 ? (data.total_leads / maxLeads) * 100 : 0}%` }}
+                          />
+                          <div 
+                            className="bg-verde-inteligente rounded-sm"
+                            style={{ width: `${maxLeads > 0 ? (data.convertidos / maxLeads) * 100 : 0}%` }}
+                          />
                         </div>
                       </div>
-                      <div className="flex gap-1 h-4">
-                        <div 
-                          className="bg-purple-vivid/30 rounded-sm"
-                          style={{ width: `${(data.leads / 70) * 100}%` }}
-                        />
-                        <div 
-                          className="bg-verde-inteligente rounded-sm"
-                          style={{ width: `${(data.convertidos / 70) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-8">
+                    <BarChart3 className="w-12 h-12 text-cinza-claro mx-auto mb-4" />
+                    <p className="text-cinza-claro">Nenhum dado de conversão disponível</p>
+                  </div>
+                )}
               </div>
               
               <div className="mt-6 text-center">
@@ -175,23 +208,42 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {leadSources.map((source) => (
-                  <div key={source.source} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-branco-suave">{source.source}</span>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-branco-puro">{source.leads}</p>
-                        <p className="text-xs text-cinza-claro">{source.percentage}%</p>
+                {funnelLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="animate-pulse space-y-2">
+                        <div className="h-3 bg-white/10 rounded w-2/3"></div>
+                        <div className="h-2 bg-white/5 rounded"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : salesFunnel && salesFunnel.length > 0 ? (
+                  salesFunnel.map((stage) => (
+                    <div key={stage.stage} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-branco-suave">{stage.stage}</span>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-branco-puro">{stage.count}</p>
+                          <p className="text-xs text-cinza-claro">{stage.percentage.toFixed(1)}%</p>
+                        </div>
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2">
+                        <div 
+                          className="h-2 rounded-full"
+                          style={{ 
+                            width: `${stage.percentage}%`,
+                            backgroundColor: stage.color
+                          }}
+                        />
                       </div>
                     </div>
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full bg-gradient-to-r from-purple-vivid to-cyan-vivid"
-                        style={{ width: `${source.percentage}%` }}
-                      />
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 text-cinza-claro mx-auto mb-4" />
+                    <p className="text-cinza-claro">Nenhum dado disponível</p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -211,18 +263,22 @@ export default function AnalyticsPage() {
                       <p className="text-xs text-cinza-claro">Taxa de abertura</p>
                     </div>
                   </div>
-                  <Badge className="bg-green-500/20 text-green-500">68%</Badge>
+                  <Badge className="bg-green-500/20 text-green-500">
+                    {emailLoading ? "--" : `${mainMetrics?.taxaAberturaEmail.toFixed(0) || 0}%`}
+                  </Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-verde-inteligente" />
+                    <Users className="w-5 h-5 text-verde-inteligente" />
                     <div>
-                      <p className="text-sm font-medium text-branco-puro">WhatsApp</p>
-                      <p className="text-xs text-cinza-claro">Taxa de resposta</p>
+                      <p className="text-sm font-medium text-branco-puro">Leads Convertidos</p>
+                      <p className="text-xs text-cinza-claro">Total no período</p>
                     </div>
                   </div>
-                  <Badge className="bg-green-500/20 text-green-500">89%</Badge>
+                  <Badge className="bg-green-500/20 text-green-500">
+                    {metricsLoading ? "--" : mainMetrics?.convertidos || 0}
+                  </Badge>
                 </div>
                 
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
@@ -230,10 +286,12 @@ export default function AnalyticsPage() {
                     <Calendar className="w-5 h-5 text-purple-vivid" />
                     <div>
                       <p className="text-sm font-medium text-branco-puro">Agendamentos</p>
-                      <p className="text-xs text-cinza-claro">Taxa de comparecimento</p>
+                      <p className="text-xs text-cinza-claro">Leads agendados</p>
                     </div>
                   </div>
-                  <Badge className="bg-yellow-500/20 text-yellow-500">76%</Badge>
+                  <Badge className="bg-purple-500/20 text-purple-500">
+                    {metricsLoading ? "--" : mainMetrics?.agendados || 0}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
