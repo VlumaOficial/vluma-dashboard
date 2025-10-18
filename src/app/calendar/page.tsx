@@ -11,7 +11,7 @@ import { ptBR } from "date-fns/locale";
 export default function CalendarPage() {
   const { data: leads, isLoading } = useLeads();
   
-  const agendamentos = leads?.filter(lead => lead.status === "agendado") || [];
+  const agendamentos = leads?.filter(lead => lead.status_agendamento === "agendado") || [];
   const proximosAgendamentos = agendamentos.slice(0, 10);
 
   return (

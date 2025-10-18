@@ -16,7 +16,6 @@ import { Lead } from "@/lib/supabase";
 
 const statusColors = {
   pendente: "bg-yellow-500/20 text-yellow-500",
-  contatado: "bg-blue-500/20 text-blue-500",
   agendado: "bg-purple-500/20 text-purple-500",
   convertido: "bg-green-500/20 text-green-500",
   perdido: "bg-red-500/20 text-red-500",
@@ -24,7 +23,6 @@ const statusColors = {
 
 const statusLabels = {
   pendente: "Pendente",
-  contatado: "Contatado",
   agendado: "Agendado",
   convertido: "Convertido",
   perdido: "Perdido",
@@ -42,11 +40,11 @@ export default function LeadsPage() {
   const filteredLeads = leads?.filter(lead => {
     const matchesSearch = lead.nome.toLowerCase().includes(search.toLowerCase()) ||
                          lead.email.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || lead.status_agendamento === statusFilter;
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const handleStatusChange = (leadId: string, newStatus: Lead["status"]) => {
+  const handleStatusChange = (leadId: string, newStatus: Lead["status_agendamento"]) => {
     updateStatus.mutate({ id: leadId, status: newStatus });
   };
 
@@ -78,7 +76,6 @@ export default function LeadsPage() {
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="pendente">Pendente</SelectItem>
-            <SelectItem value="contatado">Contatado</SelectItem>
             <SelectItem value="agendado">Agendado</SelectItem>
             <SelectItem value="convertido">Convertido</SelectItem>
             <SelectItem value="perdido">Perdido</SelectItem>
@@ -151,17 +148,16 @@ export default function LeadsPage() {
                     </td>
                     <td className="p-4">
                       <Select
-                        value={lead.status}
-                        onValueChange={(value) => handleStatusChange(lead.id, value as Lead["status"])}
+                        value={lead.status_agendamento}
+                        onValueChange={(value) => handleStatusChange(lead.id, value as Lead["status_agendamento"])}
                       >
                         <SelectTrigger className="w-32 h-8 bg-transparent border-0 p-0">
-                          <Badge className={statusColors[lead.status]}>
-                            {statusLabels[lead.status]}
+                          <Badge className={statusColors[lead.status_agendamento as keyof typeof statusColors]}>
+                            {statusLabels[lead.status_agendamento as keyof typeof statusLabels]}
                           </Badge>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="contatado">Contatado</SelectItem>
                           <SelectItem value="agendado">Agendado</SelectItem>
                           <SelectItem value="convertido">Convertido</SelectItem>
                           <SelectItem value="perdido">Perdido</SelectItem>
@@ -223,8 +219,8 @@ export default function LeadsPage() {
                 <div>
                   <label className="text-sm font-medium text-branco-suave">Status</label>
                   <div className="mt-1">
-                    <Badge className={statusColors[selectedLead.status]}>
-                      {statusLabels[selectedLead.status]}
+                    <Badge className={statusColors[selectedLead.status_agendamento as keyof typeof statusColors]}>
+                      {statusLabels[selectedLead.status_agendamento as keyof typeof statusLabels]}
                     </Badge>
                   </div>
                 </div>
