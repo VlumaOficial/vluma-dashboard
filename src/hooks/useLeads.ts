@@ -104,6 +104,53 @@ export function useUpdateLeadStatus() {
   });
 }
 
+export function useUpdateLeadAgendamento() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, status, dataAgendamento }: { 
+      id: string; 
+      status: Lead["status"]; 
+      dataAgendamento?: string 
+    }) => {
+      console.log("Tentando atualizar lead com agendamento:", { id, status, dataAgendamento });
+      
+      const updateData: any = { status: status };
+      if (dataAgendamento) {
+        updateData.data_agendamento = dataAgendamento;
+      }
+      
+      const { data, error } = await supabase
+        .from("contatos")
+        .update(updateData)
+        .eq("id", id)
+        .select();
+
+      if (error) {
+        console.error("Erro detalhado do Supabase:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      console.log("Lead atualizado com agendamento:", data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["lead-stats"] });
+      toast.success("Agendamento atualizado!");
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar agendamento:", error);
+      toast.error(`Erro ao atualizar agendamento: ${error.message || 'Erro desconhecido'}`);
+    },
+  });
+}
+
 export function useDeleteLead() {
   const queryClient = useQueryClient();
 

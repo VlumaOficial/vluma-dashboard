@@ -2,7 +2,7 @@
 
 import { Calendar, Clock, User, Mail, Phone } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { useLeads, useUpdateLeadStatus } from "@/hooks/useLeads";
+import { useLeads, useUpdateLeadStatus, useUpdateLeadAgendamento } from "@/hooks/useLeads";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths } from "date-fns";
@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 export default function CalendarPage() {
   const { data: leads, isLoading } = useLeads();
   const updateStatus = useUpdateLeadStatus();
+  const updateAgendamento = useUpdateLeadAgendamento();
   const [isIntegrating, setIsIntegrating] = useState(false);
   
   // Estados do calendário
@@ -57,9 +58,15 @@ export default function CalendarPage() {
   };
 
   const handleNovoAgendamento = () => {
-    toast.info("Novo Agendamento - Redirecionando para gestão de leads...");
-    // Redirecionar para página de leads para alterar status
-    window.location.href = "/leads";
+    if (leadsDisponiveis.length === 0) {
+      toast.error("Nenhum lead pendente disponível para agendamento. Vá para a página de leads primeiro.");
+      return;
+    }
+    
+    // Abrir modal para hoje
+    setSelectedDate(new Date());
+    setIsAgendamentoModalOpen(true);
+    toast.info("Selecione um lead e horário para agendar");
   };
 
   const handleVerAgendaCompleta = () => {
@@ -103,8 +110,12 @@ export default function CalendarPage() {
     dataHora.setHours(parseInt(hora), parseInt(minuto));
 
     // Atualizar o lead com status agendado e data/hora
-    updateStatus.mutate(
-      { id: selectedLeadId, status: "agendado" },
+    updateAgendamento.mutate(
+      { 
+        id: selectedLeadId, 
+        status: "agendado",
+        dataAgendamento: dataHora.toISOString()
+      },
       {
         onSuccess: () => {
           const leadNome = leads?.find(l => l.id === selectedLeadId)?.nome || "Lead";
