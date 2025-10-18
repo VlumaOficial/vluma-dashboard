@@ -2,17 +2,61 @@
 
 import { Calendar, Clock, User, Mail, Phone } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { useLeads } from "@/hooks/useLeads";
+import { useLeads, useUpdateLeadStatus } from "@/hooks/useLeads";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function CalendarPage() {
   const { data: leads, isLoading } = useLeads();
+  const updateStatus = useUpdateLeadStatus();
+  const [isIntegrating, setIsIntegrating] = useState(false);
   
   const agendamentos = leads?.filter(lead => lead.status === "agendado") || [];
   const proximosAgendamentos = agendamentos.slice(0, 10);
+
+  // Handlers para as ações de agendamento
+  const handleConfirmarAgendamento = (leadId: string, leadName: string) => {
+    updateStatus.mutate(
+      { id: leadId, status: "convertido" },
+      {
+        onSuccess: () => {
+          toast.success(`Agendamento de ${leadName} confirmado e marcado como convertido!`);
+        }
+      }
+    );
+  };
+
+  const handleReagendarAgendamento = (leadId: string, leadName: string) => {
+    // Por enquanto, apenas mostra uma mensagem
+    toast.info(`Reagendamento de ${leadName} - Funcionalidade em desenvolvimento`);
+    // TODO: Implementar modal de reagendamento com seleção de data/hora
+  };
+
+  const handleNovoAgendamento = () => {
+    toast.info("Novo Agendamento - Redirecionando para gestão de leads...");
+    // Redirecionar para página de leads para alterar status
+    window.location.href = "/leads";
+  };
+
+  const handleVerAgendaCompleta = () => {
+    toast.info("Agenda Completa - Funcionalidade em desenvolvimento");
+    // TODO: Implementar visualização completa do calendário
+  };
+
+  const handleIntegrarGoogleCalendar = async () => {
+    setIsIntegrating(true);
+    toast.info("Integrando com Google Calendar...");
+    
+    // Simular integração (substituir por implementação real)
+    setTimeout(() => {
+      setIsIntegrating(false);
+      toast.success("Integração com Google Calendar configurada! (Demo)");
+    }, 2000);
+  };
 
   return (
     <DashboardLayout 
@@ -67,8 +111,14 @@ export default function CalendarPage() {
               <p className="text-sm text-cinza-claro">
                 📅 Calendário completo em desenvolvimento
               </p>
-              <Button variant="outline" size="sm" className="mt-2 text-cyan-vivid border-cyan-vivid/50">
-                Integrar Google Calendar
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 text-cyan-vivid border-cyan-vivid/50 hover:bg-cyan-vivid/10"
+                onClick={handleIntegrarGoogleCalendar}
+                disabled={isIntegrating}
+              >
+                {isIntegrating ? "Integrando..." : "Integrar Google Calendar"}
               </Button>
             </div>
           </div>
@@ -130,10 +180,19 @@ export default function CalendarPage() {
                     </div>
                     
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" variant="outline" className="flex-1 text-xs">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 text-xs hover:bg-white/10"
+                        onClick={() => handleReagendarAgendamento(lead.id, lead.nome)}
+                      >
                         Reagendar
                       </Button>
-                      <Button size="sm" className="flex-1 text-xs bg-verde-inteligente hover:bg-verde-inteligente/80">
+                      <Button 
+                        size="sm" 
+                        className="flex-1 text-xs bg-verde-inteligente hover:bg-verde-inteligente/80"
+                        onClick={() => handleConfirmarAgendamento(lead.id, lead.nome)}
+                      >
                         Confirmar
                       </Button>
                     </div>
@@ -157,11 +216,18 @@ export default function CalendarPage() {
               Ações Rápidas
             </h4>
             <div className="space-y-3">
-              <Button className="w-full justify-start bg-laranja-cta hover:bg-laranja-cta/80">
+              <Button 
+                className="w-full justify-start bg-laranja-cta hover:bg-laranja-cta/80"
+                onClick={handleNovoAgendamento}
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 Novo Agendamento
               </Button>
-              <Button variant="outline" className="w-full justify-start text-cyan-vivid border-cyan-vivid/50">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-cyan-vivid border-cyan-vivid/50 hover:bg-cyan-vivid/10"
+                onClick={handleVerAgendaCompleta}
+              >
                 <Clock className="w-4 h-4 mr-2" />
                 Ver Agenda Completa
               </Button>
